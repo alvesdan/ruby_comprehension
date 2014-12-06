@@ -13,7 +13,7 @@ class Comprehension
   def comprehend(keys = {}, offset: 0)
     if bindings.any?
       key, values = array_bindings[offset]
-      values.map do |value|
+      Array(values).map do |value|
         comprehend(keys.merge(key => value), offset: offset + 1)
       end if values
     end
