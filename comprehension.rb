@@ -1,58 +1,29 @@
 class Comprehension
-  attr_reader :rawlist, :bindings, :where
+  attr_reader :rawlist, :bindings, :where, :list
   def initialize(rawlist, bindings, where: nil)
     @rawlist = rawlist
     @bindings = bindings
     @where = where
-    @result = []
-  end
-
-  def list
-    while bindings_available?
-      values.each do |key, val|
-        merge(key, val, values)
-      end
-    end
-    @result
+    @list = []
+    comprehend
   end
 
   private
 
-  def bindings_number
-    bindings.keys.size
-  end
+  def comprehend(keys = {}, offset: 0)
+    if bindings.any?
+      key, values = array_bindings[offset]
+      values.map do |value|
+        comprehend(keys.merge(key => value), offset: offset + 1)
+      end if values
+    end
 
-  def bindings_available?
-    puts "BINDINGS: #{bindings.inspect}"
-    bindings.any? { |k, v| v.size > 1 }
-  end
-
-  def values
-    ({}).tap do |values|
-      bindings.each do |key, val|
-        values[key] = val.size > 1 ? val.shift : val
-      end
+    if keys.size == rawlist.size
+      @list << rawlist.map { |k| keys[k] }
     end
   end
 
-  def merge(key, val, values)
-    puts "FILTERED: #{filtered(key)}"
-    filtered(key).each do |i, list|
-      list.each do |v|
-        @result << rawlist.map { |r|
-          case r
-          when key then val
-          when i then v
-          else
-            values[r]
-          end
-        }
-      end
-    end
+  def array_bindings
+    bindings.map { |k,v| [k,v] }
   end
-
-  def filtered(key)
-    bindings.reject { |k, v| k == key }
-  end
-
 end
