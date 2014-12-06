@@ -18,8 +18,23 @@ class Comprehension
       end if values
     end
 
-    if keys.size == rawlist.size
-      @list << rawlist.map { |k| keys[k] }
+    @list << element(keys) if keys.size == bindings.size
+  end
+
+  def element(keys)
+    case rawlist
+    when Symbol
+      keys[rawlist]
+    when Proc
+      rawlist.call(*keys.values)
+    when Array
+      rawlist.map do |k|
+        if k.is_a?(Proc)
+          k.call(*keys.values)
+        else
+          keys[k]
+        end
+      end
     end
   end
 
