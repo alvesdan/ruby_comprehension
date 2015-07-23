@@ -9,6 +9,11 @@ RSpec.describe Comprehension do
     expect(c.list).to eq ([[1, 1], [1, 2], [1, 3], [1, 4], [2, 1], [2, 2], [2, 3], [2, 4]])
   end
 
+  it 'returns an enumerator' do
+    c = described_class.new([:i, :j], i: [1, 2], j: [1, 2, 3, 4])
+    expect(c.enumerator.next).to eq [1, 1]
+  end
+
   it 'understands procs' do
     c = described_class.new(proc { |i, j| i * j }, i: [1, 2], j: [3, 4])
     expect(c.list).to eq ([3, 4, 6, 8])

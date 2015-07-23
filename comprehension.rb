@@ -4,24 +4,41 @@ class Comprehension
     @rawlist = rawlist
     @bindings = bindings
     @where = where
-    @list = []
-    comprehend
+  end
+
+  def list
+    enumerator.each_with_object([]) do |el, obj|
+      obj << el
+    end
+  end
+
+  def each(&block)
+    enumerator.each { |el| block.call(el) }
+  end
+
+  def enumerator
+    Enumerator.new do |y|
+      combine_hash(bindings) do |keys|
+        y << parse(keys)
+      end
+    end
   end
 
   private
 
-  def comprehend(keys = {}, offset: 0)
-    if bindings.any?
-      key, values = array_bindings[offset]
-      Array(values).map do |value|
-        comprehend(keys.merge(key => value), offset: offset + 1)
-      end if values
+  def combine_hash(hash)
+    if hash.empty?
+      yield hash
+    else
+      dup = hash.dup
+      key, list = dup.shift
+      list.each do |el|
+        combine_hash(dup) { |arg| yield({key => el}.merge(arg)) }
+      end
     end
-
-    @list << element(keys) if keys.size == bindings.size
   end
 
-  def element(keys)
+  def parse(keys)
     case rawlist
     when Symbol
       keys[rawlist]
