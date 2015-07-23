@@ -54,8 +54,4 @@ class Comprehension
       end
     end
   end
-
-  def array_bindings
-    bindings.map { |k,v| [k,v] }
-  end
 end
