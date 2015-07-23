@@ -8,17 +8,25 @@ class Comprehension
     comprehend
   end
 
+  def result
+    Enumerator.new do |value|
+      row = @list[value]
+      break unless row
+      yielder << element(row) if row
+     end
+  end
+
   private
 
   def comprehend(keys = {}, offset: 0)
     if bindings.any?
       key, values = array_bindings[offset]
-      Array(values).map do |value|
+      Array(values).each do |value|
         comprehend(keys.merge(key => value), offset: offset + 1)
       end if values
     end
 
-    @list << element(keys) if keys.size == bindings.size
+    @list << keys if keys.size == bindings.size
   end
 
   def element(keys)
